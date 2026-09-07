@@ -1,58 +1,141 @@
 # Classificador Bayesiano - Bank Marketing
 
-Projeto desenvolvido para a disciplina de **Inteligência Artificial**, com o objetivo de implementar e analisar um classificador **Naive Bayes** utilizando o dataset Bank Marketing.
+Projeto desenvolvido para o **Estudo Dirigido** da disciplina de **Inteligência Artificial** do curso de **Bacharelado em Ciência da Computação** da **Universidade Federal do Agreste de Pernambuco (UFAPE)**.
 
-## Dataset
+O projeto tem como objetivo aplicar conceitos de **classificação Bayesiana** e implementar manualmente um classificador **Naive Bayes**, utilizando características contínuas e categóricas.
 
-Foi utilizado o **Bank Marketing Dataset**, disponibilizado pelo UCI Machine Learning Repository.
+---
 
-O objetivo é prever se um cliente aderiu (`yes`) ou não (`no`) a um depósito a prazo após uma campanha de marketing bancário.
+## Informações
 
-- Registros: 45.211
-- Classe `0`: não aderiu
-- Classe `1`: aderiu
-- Distribuição: 88,3% classe 0 e 11,7% classe 1
+- **Disciplina:** Inteligência Artificial
+- **Atividade:** Estudo Dirigido
+- **Período:** 2026.1
+- **Instituição:** Universidade Federal do Agreste de Pernambuco (UFAPE)
 
-Dataset: https://archive.ics.uci.edu/dataset/222/bank+marketing
+### Docente
 
-## Características utilizadas
+- [Luis Filipe Alves Pereira](https://github.com/luisfilipeap)
 
-Foram selecionadas exatamente três características:
+### Discentes
 
-| Característica | Tipo | Distribuição |
-|---|---|---|
-| `age` | Contínua | Normal |
-| `duration` | Contínua | Gamma |
-| `marital` | Categórica | Categórica |
+- [Gison Vilaça](https://github.com/gison-vilaca)
+- [Vinicius Leite](https://github.com/ViniciusLeiteCosta)
 
-A idade foi aproximada por uma distribuição Normal. A duração apresenta valores não negativos e assimetria à direita, sendo modelada por uma distribuição Gamma. O estado civil é representado por probabilidades categóricas.
+---
 
-Como existem valores de `duration = 0`, foi utilizada a transformação `duration + 1` para permitir a modelagem pela distribuição Gamma.
+# Sobre o Projeto
 
-## Metodologia
+O projeto consiste no desenvolvimento e análise de um **classificador Bayesiano** para prever se um cliente de uma instituição bancária aderiu ou não a um depósito a prazo após uma campanha de marketing.
+
+Foi utilizado o **Bank Marketing Dataset**, disponibilizado pelo **UCI Machine Learning Repository**.
+
+A variável alvo é `y`, representada no projeto por duas classes:
+
+- **Classe 0:** o cliente não aderiu ao depósito (`no`);
+- **Classe 1:** o cliente aderiu ao depósito (`yes`).
+
+O dataset possui **45.211 registros** e apresenta um forte desbalanceamento entre as classes:
+
+- aproximadamente **88,3%** pertencem à classe 0;
+- aproximadamente **11,7%** pertencem à classe 1.
+
+Dataset utilizado:
+
+https://archive.ics.uci.edu/dataset/222/bank+marketing
+
+---
+
+# Características Utilizadas
+
+Foram selecionadas exatamente três características para a construção do classificador:
+
+| Característica | Tipo | Modelo probabilístico |
+|----------------|------|-----------------------|
+| `age` | Contínua | Distribuição Normal |
+| `duration` | Contínua | Distribuição Gamma |
+| `marital` | Categórica | Probabilidades categóricas |
+
+## Age
+
+Representa a idade do cliente.
+
+Foi modelada utilizando uma **distribuição Normal** para cada classe. A análise mostrou uma grande sobreposição entre as distribuições das duas classes, indicando baixo poder de discriminação quando utilizada isoladamente.
+
+## Duration
+
+Representa a duração da última ligação realizada com o cliente, em segundos.
+
+Foi utilizada uma **distribuição Gamma**, pois a variável apresenta valores não negativos e uma distribuição assimétrica à direita.
+
+Como existem observações com `duration = 0`, foi utilizada a transformação:
+
+```text
+duration + 1
+```
+
+para permitir o ajuste da distribuição Gamma utilizada no projeto.
+
+Entre as três características selecionadas, `duration` apresentou o maior poder de discriminação entre as classes.
+
+## Marital
+
+Representa o estado civil do cliente e possui as categorias:
+
+- `married`;
+- `single`;
+- `divorced`.
+
+Por ser uma característica categórica, foram utilizadas diretamente as probabilidades condicionais de cada categoria em cada classe.
+
+---
+
+# Divisão dos Dados
 
 O dataset foi dividido de forma estratificada em:
 
-- 80% para treinamento;
-- 20% para teste;
-- `random_state = 42`.
+- **80% para treinamento**;
+- **20% para teste**;
+- semente aleatória (`random_state`) igual a **42**.
 
-Todos os priors, parâmetros das distribuições e probabilidades categóricas foram estimados **somente com os dados de treinamento**.
+A divisão resultou em:
 
-O projeto realiza:
+| Conjunto | Registros |
+|----------|----------:|
+| Treino | 36.168 |
+| Teste | 9.043 |
 
-- análise exploratória das características por classe;
-- estimação das distribuições probabilísticas;
-- cálculo de likelihood;
-- cálculo da razão de verossimilhança;
-- aplicação do Teorema de Bayes para obtenção das posteriores;
-- determinação das regras e fronteiras de decisão;
-- implementação manual do Naive Bayes;
-- avaliação no conjunto de teste.
+Distribuição das classes no conjunto de treinamento:
 
-## Análise univariada
+| Classe | Registros | Proporção |
+|--------|----------:|----------:|
+| 0 | 31.937 | 88,30% |
+| 1 | 4.231 | 11,70% |
 
-As probabilidades a priori estimadas no treino foram:
+Distribuição das classes no conjunto de teste:
+
+| Classe | Registros | Proporção |
+|--------|----------:|----------:|
+| 0 | 7.985 | 88,30% |
+| 1 | 1.058 | 11,70% |
+
+Todos os **priors, parâmetros das distribuições e probabilidades categóricas** utilizados pelo classificador foram estimados exclusivamente com os dados de treinamento.
+
+---
+
+# Análise Bayesiana
+
+Para cada característica foi realizada individualmente uma análise Bayesiana contendo:
+
+- estimação das distribuições condicionais por classe;
+- cálculo das verossimilhanças;
+- cálculo da razão de verossimilhanças;
+- estimação das probabilidades a priori;
+- cálculo das probabilidades a posteriori;
+- definição das regras de decisão;
+- determinação das fronteiras de decisão das características contínuas.
+
+As probabilidades a priori estimadas no conjunto de treinamento foram:
 
 ```text
 P(Y=0) = 0.883018
@@ -66,32 +149,54 @@ age      = 72,91 anos
 duration = 785 segundos
 ```
 
-Entre as três características, `duration` apresentou a separação mais evidente entre as classes. `age` apresenta grande sobreposição entre as distribuições, enquanto `marital` fornece alguma evidência sobre a classe, mas não é suficiente isoladamente para superar o forte prior da classe 0.
+Os gráficos gerados permitem visualizar as distribuições condicionais, as regiões de decisão e suas respectivas fronteiras.
 
-Os gráficos das distribuições e das fronteiras de decisão são gerados na pasta `resultados/`.
+---
 
-## Naive Bayes
+# Naive Bayes
 
-O classificador combina as três características:
+Após a análise individual das características, foi implementado manualmente um classificador **Naive Bayes** utilizando simultaneamente:
 
 ```text
 age + duration + marital
 ```
 
-O Naive Bayes assume **independência condicional entre as características dada a classe**.
+O modelo assume **independência condicional entre as características dada a classe**.
 
-A implementação foi realizada manualmente utilizando log-probabilidades. Dessa forma, em vez de multiplicar diversas probabilidades pequenas diretamente, são somados seus logaritmos, reduzindo problemas de precisão numérica.
+Dessa forma, a evidência fornecida pelas três características pode ser combinada para calcular um score para cada classe.
 
-A classe com maior log-score é escolhida pelo modelo.
+A implementação utiliza **log-probabilidades**, evitando a multiplicação direta de probabilidades muito pequenas e reduzindo problemas de precisão numérica.
 
-## Resultados
+A classe que apresenta o maior log-score é utilizada como previsão final.
 
-O conjunto de teste possui 9.043 registros, sendo:
+---
 
-```text
-Classe 0: 7985 (88,30%)
-Classe 1: 1058 (11,70%)
-```
+# Funcionalidades
+
+O projeto realiza:
+
+- carregamento e preparação do Bank Marketing Dataset;
+- transformação da variável alvo;
+- divisão estratificada em treino e teste;
+- análise exploratória das características;
+- visualização das características por classe;
+- estimação das distribuições probabilísticas;
+- cálculo de likelihoods;
+- cálculo da razão de verossimilhanças;
+- cálculo das probabilidades a posteriori;
+- determinação das fronteiras de decisão;
+- geração dos gráficos das regiões de decisão;
+- implementação manual do Naive Bayes;
+- combinação de características contínuas e categóricas;
+- previsão no conjunto de teste;
+- geração da matriz de confusão;
+- cálculo de acurácia, precisão, recall e F1-score.
+
+---
+
+# Resultados
+
+A avaliação final foi realizada exclusivamente no conjunto de teste.
 
 A matriz de confusão obtida foi:
 
@@ -100,23 +205,61 @@ A matriz de confusão obtida foi:
  [ 826  232]]
 ```
 
+Portanto:
+
+| Resultado | Quantidade |
+|-----------|-----------:|
+| Verdadeiros Negativos (TN) | 7.797 |
+| Falsos Positivos (FP) | 188 |
+| Falsos Negativos (FN) | 826 |
+| Verdadeiros Positivos (TP) | 232 |
+
+As métricas obtidas foram:
+
 | Métrica | Resultado |
-|---|---:|
+|---------|----------:|
 | Acurácia | 88,79% |
 | Precisão | 55,24% |
 | Recall | 21,93% |
 | F1-score | 0,3139 |
 | Baseline | 88,30% |
 
-O modelo identificou corretamente **232 dos 1.058 positivos reais**.
+Apesar da acurácia de **88,79%**, o baseline que sempre prevê a classe majoritária já alcança aproximadamente **88,30%**.
 
-Apesar da acurácia de 88,79%, o baseline que sempre prevê a classe 0 já alcança 88,30%. Por isso, a acurácia deve ser analisada em conjunto com precisão, recall, F1-score e matriz de confusão.
+O resultado deve, portanto, ser analisado juntamente com as demais métricas.
 
-O recall de 21,93% mostra que o modelo ainda possui dificuldade para identificar a classe minoritária.
+O principal erro observado foi o número de **falsos negativos**. Dos **1.058 clientes que realmente aderiram**, apenas **232 foram identificados corretamente**, resultando em um recall de **21,93%**.
 
-## Estrutura
+---
+
+# Visualizações
+
+Durante a execução são geradas visualizações na pasta `resultados/`:
+
+- distribuição de idade por classe;
+- distribuição da duração por classe;
+- distribuição do estado civil por classe;
+- distribuição e fronteira de decisão da idade;
+- distribuição e fronteira de decisão da duração;
+- matriz de confusão.
+
+---
+
+# Tecnologias Utilizadas
+
+- Python
+- Pandas
+- NumPy
+- SciPy
+- Matplotlib
+- Scikit-learn
+
+---
+
+# Estrutura do Projeto
 
 ```text
+.
 ├── data/
 │   └── bank-full.csv
 │
@@ -133,6 +276,7 @@ O recall de 21,93% mostra que o modelo ainda possui dificuldade para identificar
 │   │   ├── __init__.py
 │   │   ├── bayes.py
 │   │   └── dados.py
+│   │
 │   ├── 01_exploracao.py
 │   ├── 02_analise_univariada.py
 │   ├── 03_naive_bayes.py
@@ -143,54 +287,114 @@ O recall de 21,93% mostra que o modelo ainda possui dificuldade para identificar
 └── requirements.txt
 ```
 
-## Como executar
+| Arquivo | Descrição |
+|---------|-----------|
+| `src/modelo/dados.py` | Carregamento, divisão dos dados e estimação dos parâmetros |
+| `src/modelo/bayes.py` | Funções utilizadas pelo classificador Bayesiano |
+| `src/01_exploracao.py` | Análise exploratória e visualizações iniciais |
+| `src/02_analise_univariada.py` | Análise Bayesiana individual das três características |
+| `src/03_naive_bayes.py` | Combinação das características e classificação Naive Bayes |
+| `src/04_avaliacao.py` | Avaliação no conjunto de teste e matriz de confusão |
 
-Crie e ative um ambiente virtual:
+---
+
+# Instalação
+
+Clone o repositório:
+
+```bash
+git clone https://github.com/ViniciusLeiteCosta/ia-estudo-dirigido-2va.git
+```
+
+Entre na pasta do projeto:
+
+```bash
+cd ia-estudo-dirigido-2va
+```
+
+Crie um ambiente virtual:
+
+```bash
+python -m venv .venv
+```
+
+Ative o ambiente virtual.
+
+Windows (PowerShell):
 
 ```powershell
-python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
 Instale as dependências:
 
-```powershell
+```bash
 pip install -r requirements.txt
 ```
 
-Execute os scripts na ordem:
+---
 
-```powershell
+# Execução
+
+Execute os scripts na seguinte ordem:
+
+```bash
 python src/01_exploracao.py
 python src/02_analise_univariada.py
 python src/03_naive_bayes.py
 python src/04_avaliacao.py
 ```
 
-## Tecnologias
+Os gráficos e resultados visuais serão armazenados na pasta `resultados/`.
 
-- Python
-- Pandas
-- NumPy
-- SciPy
-- Matplotlib
-- Scikit-learn
+---
 
-## Limitações
+# Aspectos de Inteligência Artificial
 
-O dataset apresenta forte desbalanceamento entre as classes, fazendo com que o prior favoreça significativamente a classe 0.
+Durante o desenvolvimento foram aplicados conceitos como:
 
-Além disso, o Naive Bayes assume independência condicional entre `age`, `duration` e `marital`, o que é uma simplificação das relações existentes nos dados reais.
+- classificação supervisionada;
+- classificação Bayesiana;
+- distribuições condicionais;
+- probabilidade a priori;
+- verossimilhança;
+- razão de verossimilhanças;
+- Teorema de Bayes;
+- probabilidade a posteriori;
+- regras de decisão Bayesiana;
+- fronteiras de decisão;
+- independência condicional;
+- Naive Bayes;
+- classificação com características contínuas e categóricas;
+- matriz de confusão;
+- avaliação de classificadores.
 
-As distribuições Normal e Gamma também são aproximações probabilísticas das características observadas.
+---
 
-A variável `duration` só é conhecida após a realização da ligação. Portanto, seu uso é adequado para este estudo acadêmico, mas seria uma limitação em um sistema utilizado para decidir antecipadamente quais clientes deveriam ser contatados.
+# Limitações
 
-## Autores
+O modelo possui algumas limitações importantes.
 
-- Vinicius Leite Costa
-- Gison Vilaça
+O dataset apresenta um forte **desbalanceamento entre as classes**, fazendo com que a probabilidade a priori favoreça significativamente a classe 0.
 
-## Apresentação
+A distribuição Normal utilizada para `age` e a distribuição Gamma utilizada para `duration` são aproximações das distribuições reais observadas.
 
-Vídeo de apresentação:
+O Naive Bayes também assume independência condicional entre `age`, `duration` e `marital`, hipótese que pode não ser completamente verdadeira nos dados reais.
+
+Além disso, apenas três características do dataset foram utilizadas no classificador.
+
+A variável `duration` apresenta uma limitação adicional: sua duração completa somente é conhecida após a realização da ligação. Portanto, seu uso é adequado para este estudo acadêmico, mas seria inadequado em um sistema cujo objetivo fosse decidir antecipadamente quais clientes deveriam ser contatados.
+
+---
+
+# Apresentação
+
+Vídeo de apresentação do projeto:
+
+# Link do vídeo
+
+---
+
+# Licença
+
+Este projeto foi desenvolvido exclusivamente para fins acadêmicos como atividade da disciplina de Inteligência Artificial da UFAPE.
