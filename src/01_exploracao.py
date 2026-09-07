@@ -1,147 +1,79 @@
-import matplotlib.pyplot as plt
+import os
 import pandas as pd
+import matplotlib.pyplot as plt
 
+ARQUIVO = "data/bank-full.csv"
 
-# Carrega o dataset Bank Marketing
-df = pd.read_csv("data/bank-full.csv", sep=";")
+os.makedirs("resultados", exist_ok=True)
 
+df = pd.read_csv(ARQUIVO, sep=";")
 
-# Informações gerais
-print("=== DIMENSÕES DA BASE ===")
-print(f"Linhas: {df.shape[0]}")
-print(f"Colunas: {df.shape[1]}")
+print("=== DATASET ===")
+print(f"Registros: {len(df)}")
+print(f"Colunas: {len(df.columns)}")
 
-
-print("\n=== COLUNAS ===")
-print(df.columns.tolist())
-
-
-# Distribuição da variável alvo
-print("\n=== DISTRIBUIÇÃO DA CLASSE (y) ===")
+print("\n=== CLASSES ===")
 print(df["y"].value_counts())
-
-
-print("\n=== DISTRIBUIÇÃO PERCENTUAL DA CLASSE ===")
 print(df["y"].value_counts(normalize=True) * 100)
 
+print("\n=== AGE POR CLASSE ===")
+print(
+    df.groupby("y")["age"]
+    .agg(["count", "mean", "median", "std", "min", "max"])
+)
 
-# Característica categórica
-print("\n=== ESTADO CIVIL (marital) ===")
-print(df["marital"].value_counts())
+print("\n=== DURATION POR CLASSE ===")
+print(
+    df.groupby("y")["duration"]
+    .agg(["count", "mean", "median", "std", "min", "max"])
+)
 
-
-# Características contínuas
-print("\n=== IDADE (age) ===")
-print(df["age"].describe())
-
-
-print("\n=== DURAÇÃO DA CHAMADA (duration) ===")
-print(df["duration"].describe())
-
-
-# Visualização das características escolhidas
-print("\n=== DADOS SELECIONADOS ===")
-print(df[["age", "duration", "marital", "y"]].head(10))
-
-# ============================================================
-# ANÁLISE DAS CARACTERÍSTICAS SEPARADAS POR CLASSE
-# ============================================================
-
-print("\n=== IDADE POR CLASSE ===")
-print(df.groupby("y")["age"].describe())
-
-print("\n=== DURAÇÃO POR CLASSE ===")
-print(df.groupby("y")["duration"].describe())
-
-print("\n=== ESTADO CIVIL POR CLASSE ===")
+print("\n=== MARITAL POR CLASSE ===")
 print(pd.crosstab(df["marital"], df["y"]))
 
 
-# ------------------------------------------------------------
-# Gráfico da idade
-# ------------------------------------------------------------
+def salvar_histograma(coluna, arquivo, titulo):
+    for classe in ["no", "yes"]:
+        dados = df[df["y"] == classe][coluna]
 
-plt.figure(figsize=(10, 6))
+        plt.hist(
+            dados,
+            bins=40,
+            density=True,
+            alpha=0.5,
+            label=classe
+        )
 
-plt.hist(
-    df[df["y"] == "no"]["age"],
-    bins=30,
-    alpha=0.6,
-    density=True,
-    label="Não aderiu"
+    plt.title(titulo)
+    plt.xlabel(coluna)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(f"resultados/{arquivo}")
+    plt.close()
+
+
+salvar_histograma(
+    "age",
+    "idade_por_classe.png",
+    "Idade por classe"
 )
 
-plt.hist(
-    df[df["y"] == "yes"]["age"],
-    bins=30,
-    alpha=0.6,
-    density=True,
-    label="Aderiu"
+salvar_histograma(
+    "duration",
+    "duracao_por_classe.png",
+    "Duração por classe"
 )
 
-plt.xlabel("Idade")
-plt.ylabel("Densidade")
-plt.title("Distribuição da idade por classe")
-plt.legend()
-plt.tight_layout()
-
-plt.savefig("resultados/idade_por_classe.png")
-plt.show()
-
-
-# ------------------------------------------------------------
-# Gráfico da duração
-# ------------------------------------------------------------
-
-plt.figure(figsize=(10, 6))
-
-plt.hist(
-    df[df["y"] == "no"]["duration"],
-    bins=50,
-    alpha=0.6,
-    density=True,
-    label="Não aderiu"
-)
-
-plt.hist(
-    df[df["y"] == "yes"]["duration"],
-    bins=50,
-    alpha=0.6,
-    density=True,
-    label="Aderiu"
-)
-
-plt.xlabel("Duração da chamada (segundos)")
-plt.ylabel("Densidade")
-plt.title("Distribuição da duração da chamada por classe")
-plt.legend()
-plt.tight_layout()
-
-plt.savefig("resultados/duracao_por_classe.png")
-plt.show()
-
-
-# ------------------------------------------------------------
-# Gráfico do estado civil
-# ------------------------------------------------------------
-
-tabela_marital = pd.crosstab(
+pd.crosstab(
     df["marital"],
     df["y"],
-    normalize="columns"
-)
+    normalize="index"
+).plot(kind="bar")
 
-tabela_marital.plot(
-    kind="bar",
-    figsize=(10, 6)
-)
-
-plt.xlabel("Estado civil")
-plt.ylabel("Proporção dentro da classe")
-plt.title("Distribuição do estado civil por classe")
-plt.legend(["Não aderiu", "Aderiu"])
-plt.xticks(rotation=0)
+plt.title("Estado civil por classe")
+plt.ylabel("Proporção")
 plt.tight_layout()
-
 plt.savefig("resultados/estado_civil_por_classe.png")
-plt.show()
+plt.close()
+
+print("\nGráficos salvos em resultados/")
